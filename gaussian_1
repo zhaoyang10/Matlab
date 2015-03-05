@@ -1,0 +1,78 @@
+function d=distance(A,B)
+
+[hA, wA]=size(A);
+[hB, wB]=size(B);
+
+if wA ~= wB,  
+    error(' second dimension of A and B must be the same'); 
+end
+
+member = zeros(1,wA);
+C = cell(size(member));
+D = cell(size(member));
+for k=1:wA
+    C{k}= repmat(A(:,k),1,hB);
+    D{k}= repmat(B(:,k),1,hA);
+end
+             
+S=zeros(hA,hB);
+for k=1:wA
+    S=S+(C{k}-D{k}').^2;
+end
+d=sqrt(S);            
+
+
+function polutFil = FilterGauss31(new_polut, kernel)
+
+% ------------Inisialisasi dimensi citra----------------------
+new_rgb = im2double(new_polut);
+[ro co vc] = size(new_rgb);
+
+if vc == 3;
+    polR = new_rgb(:, :, 1); %figure, imshow(polR);
+    polG = new_rgb(:, :, 2); %figure, imshow(polG);
+    polB = new_rgb(:, :, 3); %figure, imshow(polB);
+    dimensi = length(kernel);
+    %polutFil = zeros(ro-dimensi+1, co-dimensi+1, vc);
+    polutFil = zeros(ro, co, vc);
+    polutFil(:, :, 1) = polutFil(:, :, 1) + conv2(polR, kernel, 'same');
+    polutFil(:, :, 2) = polutFil(:, :, 2) + conv2(polG, kernel, 'same');
+    polutFil(:, :, 3) = polutFil(:, :, 3) + conv2(polB, kernel, 'same');   
+    polutFil = im2uint8(polutFil);
+else
+    dimensi = length(kernel);
+    %polutFil = zeros(ro-dimensi+1, co-dimensi+1, vc);
+    polutFil = zeros(ro, co, vc);
+    polutFil = polutFil + conv2(new_rgb, kernel, 'same');
+    polutFil = im2uint8(polutFil);
+end
+% figure, imshow(polutFil(:, :, 1));
+% figure, imshow(polutFil(:, :, 2));
+% figure, imshow(polutFil(:, :, 3));
+% figure, imshow(polutFil);
+
+
+function gauss2 = kernelGauss(dimensi, sdev)
+
+sdev = abs(sdev);
+maks = (dimensi + 1)/2;
+
+gauss = zeros(dimensi, dimensi);
+for i = -(maks-1):(maks-1)
+    for j = -(maks-1):(maks-1)
+        k = i + maks;
+        l = j + maks;
+        gauss(k,l) = exp(-((i)^2 +(j)^2)/(2*sdev^2));
+    end
+end
+ 
+% ---------------normalisasi-----------------------
+m =(max(max(gauss))/min(min(gauss)));
+gauss2 = (gauss.*m);
+jumlah = sum(sum(gauss2));
+gauss2 = gauss2./jumlah;
+
+%-------------plot grafik 2-D Surf----------
+%x = -(maks-1):(maks-1);
+%y = -(maks-1):(maks-1);
+%figure, surf(x, y, gauss2)
